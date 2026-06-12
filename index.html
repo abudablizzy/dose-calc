@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="โดสยาเด็ก">
+<title>คำนวณโดสยาเด็ก</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#F7F8FA;
+    --surface:#FFFFFF;
+    --border:#E5E7EB;
+    --border2:#D1D5DB;
+    --text:#111827;
+    --text2:#6B7280;
+    --text3:#9CA3AF;
+    --blue-bg:#EFF6FF;
+    --blue-border:#BFDBFE;
+    --blue-text:#1D4ED8;
+    --warn-bg:#FFFBEB;
+    --warn-border:#FDE68A;
+    --warn-text:#92400E;
+    --danger-bg:#FEF2F2;
+    --danger-border:#FECACA;
+    --danger-text:#991B1B;
+    --green-bg:#F0FDF4;
+    --green-border:#BBF7D0;
+    --green-text:#166534;
+    --radius:12px;
+    --radius-sm:8px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#0F172A;
+      --surface:#1E293B;
+      --border:#334155;
+      --border2:#475569;
+      --text:#F1F5F9;
+      --text2:#94A3B8;
+      --text3:#64748B;
+      --blue-bg:#1E3A5F;
+      --blue-border:#1E40AF;
+      --blue-text:#93C5FD;
+      --warn-bg:#451A03;
+      --warn-border:#92400E;
+      --warn-text:#FCD34D;
+      --danger-bg:#450A0A;
+      --danger-border:#991B1B;
+      --danger-text:#FCA5A5;
+      --green-bg:#052E16;
+      --green-border:#166534;
+      --green-text:#86EFAC;
+    }
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;min-height:100vh}
+  .container{max-width:540px;margin:0 auto;padding:16px 16px 48px}
+  header{text-align:center;padding:20px 0 24px}
+  header h1{font-size:20px;font-weight:600;color:var(--text);letter-spacing:-0.3px}
+  header p{font-size:13px;color:var(--text2);margin-top:4px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .card-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+  .field{margin-bottom:12px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+  input[type=number],input[type=text]{
+    width:100%;padding:11px 14px;font-size:16px;
+    border:1px solid var(--border2);border-radius:var(--radius-sm);
+    background:var(--bg);color:var(--text);
+    -webkit-appearance:none;appearance:none;
+    outline:none;transition:border-color .15s;
+  }
+  input:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .search-wrap{position:relative}
+  .dropdown{
+    position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:var(--surface);border:1px solid var(--border2);
+    border-radius:var(--radius-sm);z-index:100;
+    max-height:240px;overflow-y:auto;display:none;
+    box-shadow:0 8px 24px rgba(0,0,0,.12);
+  }
+  .dropdown.open{display:block}
+  .dd-item{padding:12px 14px;font-size:15px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border)}
+  .dd-item:last-child{border-bottom:none}
+  .dd-item:active{background:var(--bg)}
+  .dd-item small{display:block;font-size:12px;color:var(--text3);margin-top:2px}
+  .result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+  .result-header{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+  .result-drug{font-size:16px;font-weight:600;color:var(--text)}
+  .result-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .tag{display:inline-block;font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;background:var(--bg);color:var(--text2);border:1px solid var(--border)}
+  .badge-safe{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border)}
+  .badge-warn{background:var(--warn-bg);color:var(--warn-text);border-color:var(--warn-border)}
+  .ml-box{background:var(--blue-bg);border-bottom:1px solid var(--blue-border);padding:16px}
+  .ml-label{font-size:12px;font-weight:600;color:var(--blue-text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .ml-value{font-size:36px;font-weight:700;color:var(--blue-text);letter-spacing:-1px;line-height:1}
+  .ml-unit{font-size:18px;font-weight:500;color:var(--blue-text);margin-left:4px}
+  .ml-sub{font-size:13px;color:var(--blue-text);opacity:.75;margin-top:6px}
+  .rows{padding:12px 16px}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .row:last-child{border-bottom:none}
+  .row-label{font-size:13px;color:var(--text2)}
+  .row-val{font-size:14px;font-weight:500;color:var(--text);text-align:right}
+  .row-sub{font-size:11px;color:var(--text3);margin-top:1px;text-align:right}
+  .note-box{padding:12px 16px;background:var(--bg);border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.5}
+  .alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start}
+  .alert-danger{background:var(--danger-bg);color:var(--danger-text);border:1px solid var(--danger-border)}
+  .alert-warn{background:var(--warn-bg);color:var(--warn-text);border:1px solid var(--warn-border)}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+  .empty-icon{font-size:32px;margin-bottom:8px}
+  .disclaimer{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--warn-text);line-height:1.6;margin-top:8px}
+  .disclaimer strong{font-weight:600}
+  @media(max-width:360px){
+    .ml-value{font-size:28px}
+    .grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>💊 คำนวณโดสยาเด็ก</h1>
+    <p>คำนวณปริมาณยาน้ำตามน้ำหนักตัว</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">ข้อมูลผู้ป่วย</div>
+    <div class="grid2">
+      <div class="field">
+        <label>น้ำหนัก (kg)</label>
+        <input type="number" id="weight" inputmode="decimal" min="1" max="100" step="0.1" placeholder="เช่น 15" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>อายุ (ปี)</label>
+        <input type="number" id="age" inputmode="decimal" min="0" max="18" step="0.5" placeholder="เช่น 3" oninput="calc()">
+      </div>
+    </div>
+    <div class="field">
+      <label>ชื่อยา</label>
+      <div class="search-wrap">
+        <input type="text" id="drug-search" placeholder="พิมชื่อยา เช่น para, amox, ibu..." autocomplete="off" autocorrect="off" autocapitalize="off" oninput="onSearch()" onfocus="onSearchFocus()">
+        <div class="dropdown" id="dropdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="results-area">
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div>พิมชื่อยาเพื่อเริ่มคำนวณ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ คำเตือน:</strong> ข้อมูลนี้เป็นเพียงแนวทางเบื้องต้น การใช้ยาในเด็กควรอยู่ภายใต้การดูแลของแพทย์หรือเภสัชกรเสมอ โดยเฉพาะในเด็กอายุน้อยกว่า 2 ปี หรือผู้ป่วยที่มีโรคประจำตัว
+  </div>
+</div>
+
+<script>
+const allDrugs = [
+  {name:"Paracetamol (Acetaminophen)",alias:["para","paracetamol","acetaminophen","tylenol","panadol"],group:"ลดไข้ / ปวด",conc:24,conc_label:"120 mg/5ml",form:"น้ำเชื่อม",min_dose:10,max_dose:15,max_single:1000,max_daily_kg:60,freq:"ทุก 4–6 ชั่วโมง",note:"ปลอดภัยสำหรับเด็กทุกวัย",safe:true},
+  {name:"Ibuprofen",alias:["ibu","ibuprofen","brufen","advil"],group:"ลดไข้ / ปวด",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:5,max_dose:10,max_single:400,max_daily_kg:40,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 6 เดือน / ระวังในผู้มีปัญหากระเพาะ",safe:false,min_age:0.5},
+  {name:"Amoxicillin",alias:["amox","amoxicillin","amoxil"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"125 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8 ชั่วโมง",note:"กลุ่ม penicillin ระวังผู้แพ้",safe:true},
+  {name:"Azithromycin",alias:["azithro","azithromycin","zithromax","azi"],group:"ยาปฏิชีวนะ",conc:40,conc_label:"200 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:10,max_dose:10,max_single:500,max_daily_kg:10,freq:"วันละ 1 ครั้ง (5 วัน)",note:"day 1: 10 mg/kg, day 2–5: 5 mg/kg",safe:true},
+  {name:"Co-amoxiclav (Augmentin)",alias:["coamox","co-amox","augmentin","amoxiclav"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"156.25 mg/5ml (amoxicillin 125 mg/5ml)",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8–12 ชั่วโมง",note:"คิดจาก amoxicillin component",safe:true},
+  {name:"Cetirizine",alias:["cetiri","cetirizine","zyrtec"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"อายุ 1–2ปี: 2.5mg, 2–6ปี: 2.5–5mg, >6ปี: 5–10mg",safe:true},
+  {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",min_dose:0.35,max_dose:0.35,max_single:4,max_daily_kg:1.5,freq:"ทุก 6 ชั่วโมง",note:"ระวังง่วงซึม",safe:false},
+  {name:"Loratadine",alias:["lorat","loratadine","claritin"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.2,max_dose:0.2,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"< 30 kg: 5 mg/day, ≥ 30 kg: 10 mg/day",safe:true,min_age:2},
+  {name:"Dextromethorphan (DXM)",alias:["dextro","dxm","dextromethorphan"],group:"ไอ / น้ำมูก",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.5,max_single:30,max_daily_kg:2,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 4 ปี",safe:false,min_age:4},
+  {name:"Bromhexine",alias:["bromhex","bromhexine"],group:"ไอ / น้ำมูก",conc:0.8,conc_label:"4 mg/5ml",form:"น้ำเชื่อม",min_dose:0.3,max_dose:0.5,max_single:8,max_daily_kg:2,freq:"ทุก 8–12 ชั่วโมง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว",safe:true,min_age:2},
+  {name:"Glyceryl Guaiacolate (Guaifenesin)",alias:["glyceryl","guaifenesin","guai","gg","guaiacolate"],group:"ไอ / น้ำมูก",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:6,max_dose:12,max_single:600,max_daily_kg:50,freq:"ทุก 4–6 ชั่วโมง",note:"ขับเสมหะ ควรดื่มน้ำมากๆ ห้ามใช้ในเด็กอายุ < 2 ปี",safe:false,min_age:2},
+  {name:"Ambroxol",alias:["ambroxol","ambroxal","ambro","mucosolvan","ambrox"],group:"ไอ / น้ำมูก",conc:3,conc_label:"15 mg/5ml",form:"น้ำเชื่อม",min_dose:1.2,max_dose:1.6,max_single:30,max_daily_kg:4.8,freq:"ทุก 8–12 ชั่วโมง (วันละ 2–3 ครั้ง)",note:"ละลายเสมหะ ห้ามใช้ในเด็กอายุ < 2 ปี โดยไม่มีคำแนะนำจากแพทย์",safe:true,min_age:2},
+  {name:"Cefixime",alias:["cefixime","cefix","suprax","cef"],group:"ยาปฏิชีวนะ",conc:20,conc_label:"100 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:4,max_dose:8,max_single:400,max_daily_kg:8,freq:"ทุก 12–24 ชั่วโมง",note:"กลุ่ม cephalosporin ห้ามใช้ในเด็กอายุ < 6 เดือน ระวังในผู้แพ้ penicillin",safe:true,min_age:0.5},
+];
+
+let selected = null;
+
+function onSearch(){
+  const q = document.getElementById('drug-search').value.trim().toLowerCase();
+  showDropdown(q);
+}
+function onSearchFocus(){
+  const q = document.getElementById('drug-search').value.trim().toLowerCase();
+  showDropdown(q);
+}
+function showDropdown(q){
+  const dd = document.getElementById('dropdown');
+  if(!q){dd.className='dropdown';return;}
+  const hits = allDrugs.filter(d=>d.name.toLowerCase().includes(q)||d.alias.some(a=>a.includes(q)));
+  if(!hits.length){dd.className='dropdown';return;}
+  dd.innerHTML = hits.map(d=>`<div class="dd-item" ontouchstart="" onclick="pick(${allDrugs.indexOf(d)})">${d.name}<small>${d.group} · ${d.form}</small></div>`).join('');
+  dd.className='dropdown open';
+}
+function pick(i){
+  selected = allDrugs[i];
+  document.getElementById('drug-search').value = selected.name;
+  document.getElementById('dropdown').className='dropdown';
+  calc();
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-wrap')) document.getElementById('dropdown').className='dropdown';
+});
+function rh(n){return Math.round(n*2)/2;}
+function calc(){
+  const wt = parseFloat(document.getElementById('weight').value);
+  const age = parseFloat(document.getElementById('age').value);
+  const area = document.getElementById('results-area');
+  if(!selected){
+    area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">🔍</div><div>พิมชื่อยาเพื่อเริ่มคำนวณ</div></div></div>';
+    return;
+  }
+  if(!wt||wt<=0){
+    area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">⚖️</div><div>กรุณากรอกน้ำหนักของผู้ป่วย</div></div></div>';
+    return;
+  }
+  const d = selected;
+  const mgMin = Math.min(d.min_dose*wt, d.max_single);
+  const mgMax = Math.min(d.max_dose*wt, d.max_single);
+  const maxDailyMg = Math.min(d.max_daily_kg*wt, d.max_single*4);
+  const mlMin = rh(mgMin/d.conc);
+  const mlMax = rh(mgMax/d.conc);
+  const mlDaily = rh(maxDailyMg/d.conc);
+  const mlStr = mlMin===mlMax ? `${mlMin.toFixed(1)}` : `${mlMin.toFixed(1)}–${mlMax.toFixed(1)}`;
+  const mgStr = mlMin===mlMax ? `${mgMin.toFixed(0)}` : `${mgMin.toFixed(0)}–${mgMax.toFixed(0)}`;
+  const doseStr = d.min_dose===d.max_dose ? `${d.min_dose}` : `${d.min_dose}–${d.max_dose}`;
+  const ageWarn = d.min_age && !isNaN(age) && age < d.min_age;
+  const overMax = d.max_dose*wt >= d.max_single;
+  const badge = d.safe ? `<span class="tag badge-safe">ปลอดภัย</span>` : `<span class="tag badge-warn">ระวัง</span>`;
+  const ageAlert = ageWarn ? `<div class="alert alert-danger">⚠️ ยานี้ไม่แนะนำในเด็กอายุน้อยกว่า ${d.min_age} ปี</div>` : '';
+  const maxAlert = overMax ? `<div class="alert alert-warn">⚠️ โดสเกิน max — ใช้ไม่เกิน ${(d.max_single/d.conc).toFixed(1)} ml ต่อครั้ง</div>` : '';
+
+  area.innerHTML = `
+  <div class="result-card">
+    <div class="result-header">
+      <div class="result-drug">${d.name}</div>
+      <div class="result-meta">
+        <span class="tag">${d.group}</span>
+        ${badge}
+        <span class="tag">${d.conc_label}</span>
+      </div>
+    </div>
+    <div class="ml-box">
+      <div class="ml-label">ปริมาณต่อครั้ง</div>
+      <div><span class="ml-value">${mlStr}</span><span class="ml-unit">ml</span></div>
+      <div class="ml-sub">${mgStr} mg &nbsp;·&nbsp; ${doseStr} mg/kg/dose × ${wt} kg</div>
+    </div>
+    ${ageAlert}${maxAlert}
+    <div class="rows">
+      <div class="row">
+        <div class="row-label">ความถี่</div>
+        <div class="row-val">${d.freq}</div>
+      </div>
+      <div class="row">
+        <div class="row-label">สูงสุดต่อวัน</div>
+        <div>
+          <div class="row-val">${mlDaily.toFixed(1)} ml/day</div>
+          <div class="row-sub">${maxDailyMg.toFixed(0)} mg · max ${d.max_daily_kg} mg/kg/day</div>
+        </div>
+      </div>
+    </div>
+    <div class="note-box">ℹ️ ${d.note}</div>
+  </div>`;
+}
+</script>
+</body>
+</html>

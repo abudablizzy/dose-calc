@@ -166,11 +166,11 @@
 const allDrugs = [
   {name:"Paracetamol (Acetaminophen)",alias:["para","paracetamol","acetaminophen","tylenol","panadol"],group:"ลดไข้ / ปวด",conc:24,conc_label:"120 mg/5ml",form:"น้ำเชื่อม",min_dose:10,max_dose:15,max_single:1000,max_daily_kg:60,freq:"ทุก 4–6 ชั่วโมง",note:"ปลอดภัยสำหรับเด็กทุกวัย",safe:true},
   {name:"Ibuprofen",alias:["ibu","ibuprofen","brufen","advil"],group:"ลดไข้ / ปวด",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:5,max_dose:10,max_single:400,max_daily_kg:40,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 6 เดือน / ระวังในผู้มีปัญหากระเพาะ",safe:false,min_age:0.5},
-  {name:"Amoxicillin",alias:["amox","amoxicillin","amoxil"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"125 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8 ชั่วโมง",note:"กลุ่ม penicillin ระวังผู้แพ้",safe:true},
+  {name:"Amoxicillin",alias:["amox","amoxicillin","amoxil"],group:"ยาปฏิชีวนะ",conc:50,conc_label:"250 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:8.33,max_dose:16.67,max_single:500,max_daily_kg:90,freq:"ทุก 8 ชั่วโมง",note:"กลุ่ม penicillin ระวังผู้แพ้",safe:true},
   {name:"Azithromycin",alias:["azithro","azithromycin","zithromax","azi"],group:"ยาปฏิชีวนะ",conc:40,conc_label:"200 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:10,max_dose:10,max_single:500,max_daily_kg:10,freq:"วันละ 1 ครั้ง (5 วัน)",note:"day 1: 10 mg/kg, day 2–5: 5 mg/kg",safe:true},
   {name:"Co-amoxiclav (Augmentin)",alias:["coamox","co-amox","augmentin","amoxiclav"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"156.25 mg/5ml (amoxicillin 125 mg/5ml)",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8–12 ชั่วโมง",note:"คิดจาก amoxicillin component",safe:true},
   {name:"Cetirizine",alias:["cetiri","cetirizine","zyrtec"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"อายุ 1–2ปี: 2.5mg, 2–6ปี: 2.5–5mg, >6ปี: 5–10mg",safe:true},
-  {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",min_dose:0.35,max_dose:0.35,max_single:4,max_daily_kg:1.5,freq:"ทุก 6 ชั่วโมง",note:"ระวังง่วงซึม",safe:false},
+  {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:1},{min_age:6,max_age:18,dose:2}],max_single:4,freq:"ทุก 4–6 ชั่วโมง",note:"ระวังง่วงซึม ไม่แนะนำในเด็กอายุ < 2 ปี",safe:false,min_age:2},
   {name:"Loratadine",alias:["lorat","loratadine","claritin"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.2,max_dose:0.2,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"< 30 kg: 5 mg/day, ≥ 30 kg: 10 mg/day",safe:true,min_age:2},
   {name:"Dextromethorphan (DXM)",alias:["dextro","dxm","dextromethorphan"],group:"ไอ / น้ำมูก",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.5,max_single:30,max_daily_kg:2,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 4 ปี",safe:false,min_age:4},
   {name:"Bromhexine",alias:["bromhex","bromhexine"],group:"ไอ / น้ำมูก",conc:0.8,conc_label:"4 mg/5ml",form:"น้ำเชื่อม",min_dose:0.3,max_dose:0.5,max_single:8,max_daily_kg:2,freq:"ทุก 8–12 ชั่วโมง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว",safe:true,min_age:2},
@@ -220,6 +220,42 @@ function calc(){
     return;
   }
   const d = selected;
+  const ageWarn = d.min_age && !isNaN(age) && age < d.min_age;
+  const badge = d.safe ? `<span class="tag badge-safe">ปลอดภัย</span>` : `<span class="tag badge-warn">ระวัง</span>`;
+  const ageAlert = ageWarn ? `<div class="alert alert-danger">⚠️ ยานี้ไม่แนะนำในเด็กอายุน้อยกว่า ${d.min_age} ปี</div>` : '';
+
+  if(d.age_based) {
+    if(isNaN(age)||age<=0){
+      area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">🎂</div><div>ยานี้คำนวณตามอายุ — กรุณากรอกอายุของผู้ป่วย</div></div></div>';
+      return;
+    }
+    const ageGroup = d.age_doses.find(g => age >= g.min_age && age < g.max_age);
+    if(!ageGroup){
+      area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">⚠️</div><div>อายุไม่อยู่ในช่วงที่กำหนด กรุณาปรึกษาแพทย์</div></div></div>';
+      return;
+    }
+    const mgDose = ageGroup.dose;
+    const mlDose = rh(mgDose/d.conc);
+    area.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-drug">${d.name}</div>
+        <div class="result-meta"><span class="tag">${d.group}</span>${badge}<span class="tag">${d.conc_label}</span></div>
+      </div>
+      <div class="ml-box">
+        <div class="ml-label">ปริมาณต่อครั้ง</div>
+        <div><span class="ml-value">${mlDose.toFixed(1)}</span><span class="ml-unit">ml</span></div>
+        <div class="ml-sub">${mgDose} mg · อายุ ${ageGroup.min_age}–${ageGroup.max_age} ปี</div>
+      </div>
+      ${ageAlert}
+      <div class="rows">
+        <div class="row"><div class="row-label">ความถี่</div><div class="row-val">${d.freq}</div></div>
+      </div>
+      <div class="note-box">ℹ️ ${d.note}</div>
+    </div>`;
+    return;
+  }
+
   const mgMin = Math.min(d.min_dose*wt, d.max_single);
   const mgMax = Math.min(d.max_dose*wt, d.max_single);
   const maxDailyMg = Math.min(d.max_daily_kg*wt, d.max_single*4);
@@ -229,10 +265,7 @@ function calc(){
   const mlStr = mlMin===mlMax ? `${mlMin.toFixed(1)}` : `${mlMin.toFixed(1)}–${mlMax.toFixed(1)}`;
   const mgStr = mlMin===mlMax ? `${mgMin.toFixed(0)}` : `${mgMin.toFixed(0)}–${mgMax.toFixed(0)}`;
   const doseStr = d.min_dose===d.max_dose ? `${d.min_dose}` : `${d.min_dose}–${d.max_dose}`;
-  const ageWarn = d.min_age && !isNaN(age) && age < d.min_age;
   const overMax = d.max_dose*wt >= d.max_single;
-  const badge = d.safe ? `<span class="tag badge-safe">ปลอดภัย</span>` : `<span class="tag badge-warn">ระวัง</span>`;
-  const ageAlert = ageWarn ? `<div class="alert alert-danger">⚠️ ยานี้ไม่แนะนำในเด็กอายุน้อยกว่า ${d.min_age} ปี</div>` : '';
   const maxAlert = overMax ? `<div class="alert alert-warn">⚠️ โดสเกิน max — ใช้ไม่เกิน ${(d.max_single/d.conc).toFixed(1)} ml ต่อครั้ง</div>` : '';
 
   area.innerHTML = `

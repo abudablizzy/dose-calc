@@ -171,7 +171,7 @@ const allDrugs = [
   {name:"Paracetamol (Acetaminophen)",alias:["para","paracetamol","acetaminophen","tylenol","panadol"],group:"ลดไข้ / ปวด",conc:24,conc_label:"120 mg/5ml",form:"น้ำเชื่อม",min_dose:10,max_dose:15,max_single:1000,max_daily_kg:60,freq:"ทุก 4–6 ชั่วโมง",note:"ปลอดภัยสำหรับเด็กทุกวัย",safe:true},
   {name:"Ibuprofen",alias:["ibu","ibuprofen","brufen","advil"],group:"ลดไข้ / ปวด",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:5,max_dose:10,max_single:400,max_daily_kg:40,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 6 เดือน / ระวังในผู้มีปัญหากระเพาะ",safe:false,min_age:0.5},
   {name:"Amoxicillin",alias:["amox","amoxicillin","amoxil"],group:"ยาปฏิชีวนะ",conc:50,conc_label:"250 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:8.33,max_dose:16.67,max_single:500,max_daily_kg:90,freq:"ทุก 8 ชั่วโมง",note:"กลุ่ม penicillin ระวังผู้แพ้",safe:true},
-  {name:"Azithromycin",alias:["azithro","azithromycin","zithromax","azi"],group:"ยาปฏิชีวนะ",conc:40,conc_label:"200 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:10,max_dose:10,max_single:500,max_daily_kg:10,freq:"วันละ 1 ครั้ง (5 วัน)",note:"day 1: 10 mg/kg, day 2–5: 5 mg/kg",safe:true},
+  {name:"Azithromycin",alias:["azithro","azithromycin","zithromax","azi"],group:"ยาปฏิชีวนะ",conc:40,conc_label:"200 mg/5ml",form:"น้ำแขวนตะกอน",freq:"วันละ 1 ครั้ง นาน 5 วัน",regimen:[{label:"วันแรก",dose:10,max:500},{label:"วันที่ 2–5",dose:5,max:250}],note:"Pneumonia (CAP / mycoplasma / chlamydia) วันละ 1 ครั้ง ก่อนหรือหลังอาหาร",safe:true},
   {name:"Co-amoxiclav (Augmentin)",alias:["coamox","co-amox","augmentin","amoxiclav"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"156.25 mg/5ml (amoxicillin 125 mg/5ml)",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8–12 ชั่วโมง",note:"คิดจาก amoxicillin component",safe:true},
   {name:"Cetirizine",alias:["cetiri","cetirizine","zyrtec"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"อายุ 1–2ปี: 2.5mg, 2–6ปี: 2.5–5mg, >6ปี: 5–10mg",safe:true},
   {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:1},{min_age:6,max_age:18,dose:2}],max_single:4,freq:"ทุก 4–6 ชั่วโมง",note:"ระวังง่วงซึม ไม่แนะนำในเด็กอายุ < 2 ปี",safe:false,min_age:2},
@@ -231,8 +231,8 @@ function pick(i){
 document.addEventListener('click',e=>{
   if(!e.target.closest('.search-wrap')) document.getElementById('dropdown').className='dropdown';
 });
-function rh(n){if(n<1)return Math.round(n*100)/100;if(n<3)return Math.round(n*4)/4;return Math.round(n*2)/2;}
-function fm(n){if(n<1)return n.toFixed(2);if(n<10&&n%1!==0)return n.toFixed(1);return n.toFixed(0);}
+function rh(n){if(n<1)return Math.round(n*100)/100;if(n<10)return Math.round(n*4)/4;return Math.round(n*2)/2;}
+function fm(n){if(n%1===0)return n.toFixed(0);const q=(n*4)%2;if(q!==0&&n<10)return n.toFixed(2).replace(/0$/,"");if(n<1)return n.toFixed(2);return n.toFixed(1);}
 function calc(){
   const wt = parseFloat(document.getElementById('weight').value);
   const age = parseFloat(document.getElementById('age').value);
@@ -294,6 +294,42 @@ function calc(){
         <div class="row"><div class="row-label">การให้</div><div class="row-val">${d.freq}</div></div>
       </div>
       <div class="note-box">ℹ️ ${d.note} | Deficit (ml) = %dehydration × นน. × 10 — กรณี severe พิจารณา bolus NSS 10–20 ml/kg ก่อน และหักลบจาก deficit</div>
+    </div>`;
+    return;
+  }
+
+  if(d.regimen) {
+    const rows = d.regimen.map(r => {
+      const mg = Math.min(r.dose*wt, r.max);
+      const ml = rh(mg/d.conc);
+      return `<div class="row">
+        <div class="row-label">${r.label} · ${r.dose} mg/kg</div>
+        <div style="text-align:right">
+          <div class="row-val">${fm(ml)} ml</div>
+          <div class="row-sub">${fm(mg)} mg${r.dose*wt>r.max?' (max '+r.max+')':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const first = d.regimen[0];
+    const firstMg = Math.min(first.dose*wt, first.max);
+    const firstMl = rh(firstMg/d.conc);
+    area.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-drug">${d.name}</div>
+        <div class="result-meta"><span class="tag">${d.group}</span><span class="tag badge-safe">ปลอดภัย</span><span class="tag">${d.conc_label}</span></div>
+      </div>
+      <div class="ml-box">
+        <div class="ml-label">วันแรก (Loading)</div>
+        <div><span class="ml-value">${fm(firstMl)}</span><span class="ml-unit">ml</span></div>
+        <div class="ml-sub">${fm(firstMg)} mg · ${first.dose} mg/kg/dose × ${wt} kg</div>
+      </div>
+      <div class="rows">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">ตารางการให้ยา</div>
+        ${rows}
+        <div class="row"><div class="row-label">ความถี่</div><div class="row-val">${d.freq}</div></div>
+      </div>
+      <div class="note-box">ℹ️ ${d.note}</div>
     </div>`;
     return;
   }

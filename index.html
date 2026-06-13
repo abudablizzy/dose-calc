@@ -177,16 +177,24 @@ const allDrugs = [
   {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:1},{min_age:6,max_age:18,dose:2}],max_single:4,freq:"ทุก 4–6 ชั่วโมง",note:"ระวังง่วงซึม ไม่แนะนำในเด็กอายุ < 2 ปี",safe:false,min_age:2},
   {name:"Loratadine",alias:["lorat","loratadine","claritin"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.2,max_dose:0.2,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"< 30 kg: 5 mg/day, ≥ 30 kg: 10 mg/day",safe:true,min_age:2},
   {name:"Dextromethorphan (DXM)",alias:["dextro","dxm","dextromethorphan"],group:"ไอ / น้ำมูก",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.5,max_single:30,max_daily_kg:2,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 4 ปี",safe:false,min_age:4},
-  {name:"Bromhexine",alias:["bromhex","bromhexine"],group:"ไอ / น้ำมูก",conc:0.8,conc_label:"4 mg/5ml",form:"น้ำเชื่อม",min_dose:0.3,max_dose:0.5,max_single:8,max_daily_kg:2,freq:"ทุก 8–12 ชั่วโมง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว",safe:true,min_age:2},
+  {name:"Bromhexine",alias:["bromhex","bromhexine","bisolvon"],group:"ไอ / น้ำมูก",conc:0.8,conc_label:"4 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:2,label:"2 ถึง < 6 ปี",freq_override:"วันละ 3 ครั้ง (หรือ 4 mg วันละ 2 ครั้ง)",max_day:8},{min_age:6,max_age:12,dose:4,dose_max:8,label:"6 ถึง < 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:24},{min_age:12,max_age:19,dose:8,label:"≥ 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:48}],max_single:8,freq:"วันละ 3 ครั้ง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว ไม่แนะนำในเด็กอายุ < 2 ปี",safe:true,min_age:2},
   {name:"Glyceryl Guaiacolate (Guaifenesin)",alias:["glyceryl","guaifenesin","guai","gg","guaiacolate"],group:"ไอ / น้ำมูก",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:6,max_dose:12,max_single:600,max_daily_kg:50,freq:"ทุก 4–6 ชั่วโมง",note:"ขับเสมหะ ควรดื่มน้ำมากๆ ห้ามใช้ในเด็กอายุ < 2 ปี",safe:false,min_age:2},
   {name:"Ambroxol",alias:["ambroxol","ambroxal","ambro","mucosolvan","ambrox"],group:"ไอ / น้ำมูก",conc:3,conc_label:"15 mg/5ml",form:"น้ำเชื่อม",min_dose:1.2,max_dose:1.6,max_single:30,max_daily_kg:4.8,freq:"ทุก 8–12 ชั่วโมง (วันละ 2–3 ครั้ง)",note:"ละลายเสมหะ ห้ามใช้ในเด็กอายุ < 2 ปี โดยไม่มีคำแนะนำจากแพทย์",safe:true,min_age:2},
   {name:"Cefixime",alias:["cefixime","cefix","suprax","cef"],group:"ยาปฏิชีวนะ",conc:20,conc_label:"100 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:4,max_dose:8,max_single:400,max_daily_kg:8,freq:"ทุก 12–24 ชั่วโมง",note:"กลุ่ม cephalosporin ห้ามใช้ในเด็กอายุ < 6 เดือน ระวังในผู้แพ้ penicillin",safe:true,min_age:0.5},
   {name:"Cephalexin",alias:["cephalexin","cefalexin","keflex","ceph"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"125 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:6.25,max_dose:12.5,max_single:500,max_daily_kg:50,freq:"ทุก 6–12 ชั่วโมง",note:"25–50 mg/kg/day กลุ่ม cephalosporin ระวังในผู้แพ้ penicillin",safe:true},
   {name:"Domperidone",alias:["domperidone","motilium","dominox","dom"],group:"แก้คลื่นไส้ / อาเจียน",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:0.75,freq:"วันละ 3 ครั้ง ก่อนอาหาร 15 นาที",note:"อายุ >1 เดือน หรือ นน. ≤35 kg: 0.25 mg/kg วันละ 3 ครั้ง (Max 0.75 mg/kg/day) | อายุ 12–17 ปี หรือ นน. ≥35 kg: 10 mg วันละ 3 ครั้ง (Max 30 mg/day) ระวัง QT prolongation",safe:false},
+  {name:"Hyoscine-N-butylbromide (Buscopan)",alias:["buscopan","hyoscine","บัสโคพาน"],group:"แก้ปวดท้อง / ลดเกร็ง",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:6,max_age:12,dose:10,label:"6–11 ปี",freq_override:"วันละ 3 ครั้ง"},{min_age:12,max_age:18,dose:20,label:"12–17 ปี",freq_override:"วันละ 4 ครั้ง"}],max_single:20,freq:"วันละ 3–4 ครั้ง",note:"GI spasm / IBS ไม่แนะนำรูปแบบกินในเด็กอายุ < 6 ปี",safe:false,min_age:6},
+  {name:"Ceftriaxone (ฉีด)",alias:["ceftriaxone","cef3","rocephin"],group:"ยาปฏิชีวนะ (ฉีด)",conc:1,conc_label:"IV / IM",form:"ยาฉีด",mg_only:true,min_dose:50,max_dose:75,max_single:2000,max_daily_kg:75,freq:"วันละ 1 ครั้ง (OD)",note:"50–75 mg/kg/dose OD ห้ามใช้ในทารกแรกเกิดที่มีภาวะตัวเหลือง และห้ามให้ร่วมกับสารน้ำที่มี calcium ในทารก",safe:false},
+  {name:"Hydrocortisone (ฉีด)",alias:["hydrocortisone","solu-cortef","hydrocort"],group:"ยาฉุกเฉิน (ฉีด)",conc:1,conc_label:"IV",form:"ยาฉีด",mg_only:true,min_dose:5,max_dose:5,max_single:100,max_daily_kg:20,freq:"ทุก 6 ชั่วโมง",note:"5 mg/kg/dose (Max 100 mg/dose) IV สำหรับ anaphylaxis / severe asthma เป็นยาเสริม ไม่ใช้แทน adrenaline",safe:false},
+  {name:"Adrenaline / Epinephrine (Anaphylaxis)",alias:["adrenaline","epinephrine","adr","epi"],group:"ยาฉุกเฉิน (ฉีด)",conc:1,conc_label:"1:1000 (1 mg/ml) IM",form:"ยาฉีด IM",min_dose:0.01,max_dose:0.01,max_single:0.3,max_daily_kg:0.06,freq:"ซ้ำได้ทุก 5–15 นาที หากอาการไม่ดีขึ้น",note:"0.01 mg/kg (= 0.01 ml/kg ของ 1:1000) ฉีด IM กลางต้นขาด้านนอก Max เด็ก 0.3 mg, ผู้ใหญ่/วัยรุ่น 0.5 mg ตาม guideline anaphylaxis ไทย — ยา first-line ห้ามรอ",safe:false},
+  {name:"Omeprazole",alias:["omeprazole","ome","losec","miracid"],group:"ยาลดกรด (GERD)",conc:2,conc_label:"2 mg/ml (susp ตำรับสถาบันสุขภาพเด็กฯ)",form:"น้ำแขวนตะกอน",min_dose:0.7,max_dose:4,max_single:40,max_daily_kg:4,freq:"วันละ 1 ครั้ง ก่อนอาหาร 30 นาที",note:"GERD: 0.7–4 mg/kg/day วันละ 1 ครั้ง (Max 40 mg/day) นาน 4–8 สัปดาห์ | Neonates: 0.5–1.5 mg/kg/dose วันละ 1 ครั้ง",safe:true},
+  {name:"IV Maintenance Fluid (Holliday-Segar)",alias:["iv","fluid","maintenance","ivf","สารน้ำ","holliday","segar"],group:"สารน้ำ",conc_label:"Holliday-Segar method",form:"IV fluid",iv_fluid:true,freq:"ต่อเนื่อง 24 ชั่วโมง",note:"10 kg แรก: 100 ml/kg/day | 10 kg ถัดไป: 50 ml/kg/day | ส่วนที่เกิน 20 kg: 20 ml/kg/day (rate คิดตามกฎ 4-2-1)",safe:true},
   {name:"Simethicone",alias:["simethicone","airx","air-x","simeticone"],group:"ขับลม / ท้องอืด",conc:66.67,conc_label:"40 mg/0.6ml (drops)",form:"ยาหยด",age_based:true,age_doses:[{min_age:0,max_age:2,dose:20,label:"< 2 ปี (< 10.9 kg)",max_day:240},{min_age:2,max_age:12,dose:40,label:"< 12 ปี (≥ 10.9 kg)",max_day:480},{min_age:12,max_age:19,dose:40,dose_max:125,label:"≥ 12 ปี",max_day:500}],max_single:125,freq:"วันละ 4 ครั้ง หลังอาหาร และก่อนนอน",note:"คำนวณจาก simethicone (Air-x drop 40 mg/0.6 ml) ยาปลอดภัย ไม่ดูดซึมเข้ากระแสเลือด",safe:true},
 ];
 
 let selected = null;
+let deficitPct = 0;
+function setDeficit(p){ deficitPct = p; calc(); }
 
 function onSearch(){
   const q = document.getElementById('drug-search').value.trim().toLowerCase();
@@ -223,7 +231,8 @@ function pick(i){
 document.addEventListener('click',e=>{
   if(!e.target.closest('.search-wrap')) document.getElementById('dropdown').className='dropdown';
 });
-function rh(n){return Math.round(n*2)/2;}
+function rh(n){if(n<1)return Math.round(n*100)/100;if(n<3)return Math.round(n*4)/4;return Math.round(n*2)/2;}
+function fm(n){if(n<1)return n.toFixed(2);if(n<10&&n%1!==0)return n.toFixed(1);return n.toFixed(0);}
 function calc(){
   const wt = parseFloat(document.getElementById('weight').value);
   const age = parseFloat(document.getElementById('age').value);
@@ -240,6 +249,54 @@ function calc(){
   const ageWarn = d.min_age && !isNaN(age) && age < d.min_age;
   const badge = d.safe ? `<span class="tag badge-safe">ปลอดภัย</span>` : `<span class="tag badge-warn">ระวัง</span>`;
   const ageAlert = ageWarn ? `<div class="alert alert-danger">⚠️ ยานี้ไม่แนะนำในเด็กอายุน้อยกว่า ${d.min_age} ปี</div>` : '';
+
+  if(d.iv_fluid) {
+    let mlDay = 0, rate = 0;
+    if(wt <= 10){ mlDay = wt*100; }
+    else if(wt <= 20){ mlDay = 1000 + (wt-10)*50; }
+    else { mlDay = 1500 + (wt-20)*20; }
+    let breakdown = '';
+    if(wt <= 10) breakdown = wt+' kg × 100 ml/kg';
+    else if(wt <= 20) breakdown = '(10×100) + ('+(wt-10).toFixed(1)+'×50)';
+    else breakdown = '(10×100) + (10×50) + ('+(wt-20).toFixed(1)+'×20)';
+
+    const defLabels = {0:'ไม่มี', 3:'Mild (3%)', 5:'Moderate (5%)', 7:'Severe (7%)'};
+    const defMl = deficitPct * wt * 10;
+    const totalMl = mlDay + defMl;
+    const totalRate = totalMl / 24;
+
+    const defBtns = [0,3,5,7].map(p =>
+      `<button onclick="setDeficit(${p})" style="flex:1;padding:8px 4px;font-size:12px;font-weight:500;border-radius:8px;border:1px solid ${deficitPct===p?'#3B82F6':'var(--border2)'};background:${deficitPct===p?'var(--blue-bg)':'var(--surface)'};color:${deficitPct===p?'var(--blue-text)':'var(--text2)'}">${defLabels[p]}</button>`
+    ).join('');
+
+    const defRows = deficitPct > 0 ? `
+        <div class="row"><div class="row-label">Maintenance</div><div class="row-val">${Math.round(mlDay)} ml/day</div></div>
+        <div class="row"><div class="row-label">Deficit (${deficitPct}%)</div><div class="row-val">${Math.round(defMl)} ml</div></div>
+        <div class="row"><div class="row-label">รวมทั้งหมด (24 ชม.)</div><div class="row-val">${Math.round(totalMl)} ml</div></div>` : `
+        <div class="row"><div class="row-label">ปริมาณรวมต่อวัน</div><div class="row-val">${Math.round(mlDay)} ml/day</div></div>`;
+
+    area.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-drug">${d.name}</div>
+        <div class="result-meta"><span class="tag">${d.group}</span><span class="tag badge-safe">${d.conc_label}</span></div>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">ภาวะขาดน้ำ (Dehydration)</div>
+        <div style="display:flex;gap:6px">${defBtns}</div>
+      </div>
+      <div class="ml-box">
+        <div class="ml-label">Rate</div>
+        <div><span class="ml-value">${Math.round(totalRate)}</span><span class="ml-unit">ml/hr</span></div>
+        <div class="ml-sub">${deficitPct>0 ? 'Maintenance '+Math.round(mlDay)+' + Deficit '+Math.round(defMl)+' ml ใน 24 ชม.' : breakdown}</div>
+      </div>
+      <div class="rows">${defRows}
+        <div class="row"><div class="row-label">การให้</div><div class="row-val">${d.freq}</div></div>
+      </div>
+      <div class="note-box">ℹ️ ${d.note} | Deficit (ml) = %dehydration × นน. × 10 — กรณี severe พิจารณา bolus NSS 10–20 ml/kg ก่อน และหักลบจาก deficit</div>
+    </div>`;
+    return;
+  }
 
   if(d.age_based) {
     if(isNaN(age)||age<=0){
@@ -259,6 +316,7 @@ function calc(){
     const mgDisp = mgDose===mgDoseMax ? mgDose : mgDose+'–'+mgDoseMax;
     const grpLabel = ageGroup.label || ('อายุ '+ageGroup.min_age+'–'+ageGroup.max_age+' ปี');
     const maxDayRow = ageGroup.max_day ? '<div class="row"><div class="row-label">สูงสุดต่อวัน</div><div class="row-val">'+ageGroup.max_day+' mg/day</div></div>' : '';
+    const freqDisp = ageGroup.freq_override || d.freq;
     area.innerHTML = `
     <div class="result-card">
       <div class="result-header">
@@ -272,7 +330,7 @@ function calc(){
       </div>
       ${ageAlert}
       <div class="rows">
-        <div class="row"><div class="row-label">ความถี่</div><div class="row-val">${d.freq}</div></div>
+        <div class="row"><div class="row-label">ความถี่</div><div class="row-val">${freqDisp}</div></div>
         ${maxDayRow}
       </div>
       <div class="note-box">ℹ️ ${d.note}</div>
@@ -286,8 +344,8 @@ function calc(){
   const mlMin = rh(mgMin/d.conc);
   const mlMax = rh(mgMax/d.conc);
   const mlDaily = rh(maxDailyMg/d.conc);
-  const mlStr = mlMin===mlMax ? `${mlMin.toFixed(1)}` : `${mlMin.toFixed(1)}–${mlMax.toFixed(1)}`;
-  const mgStr = mlMin===mlMax ? `${mgMin.toFixed(0)}` : `${mgMin.toFixed(0)}–${mgMax.toFixed(0)}`;
+  const mlStr = mlMin===mlMax ? `${fm(mlMin)}` : `${fm(mlMin)}–${fm(mlMax)}`;
+  const mgStr = mlMin===mlMax ? `${fm(mgMin)}` : `${fm(mgMin)}–${fm(mgMax)}`;
   const doseStr = d.min_dose===d.max_dose ? `${d.min_dose}` : `${d.min_dose}–${d.max_dose}`;
   const overMax = d.max_dose*wt >= d.max_single;
   const maxAlert = overMax ? `<div class="alert alert-warn">⚠️ โดสเกิน max — ใช้ไม่เกิน ${(d.max_single/d.conc).toFixed(1)} ml ต่อครั้ง</div>` : '';
@@ -304,8 +362,11 @@ function calc(){
     </div>
     <div class="ml-box">
       <div class="ml-label">ปริมาณต่อครั้ง</div>
-      <div><span class="ml-value">${mlStr}</span><span class="ml-unit">ml</span></div>
-      <div class="ml-sub">${mgStr} mg &nbsp;·&nbsp; ${doseStr} mg/kg/dose × ${wt} kg</div>
+      ${d.mg_only
+        ? `<div><span class="ml-value">${mgStr}</span><span class="ml-unit">mg</span></div>
+           <div class="ml-sub">${doseStr} mg/kg/dose × ${wt} kg</div>`
+        : `<div><span class="ml-value">${mlStr}</span><span class="ml-unit">ml</span></div>
+           <div class="ml-sub">${mgStr} mg &nbsp;·&nbsp; ${doseStr} mg/kg/dose × ${wt} kg</div>`}
     </div>
     ${ageAlert}${maxAlert}
     <div class="rows">
@@ -316,8 +377,11 @@ function calc(){
       <div class="row">
         <div class="row-label">สูงสุดต่อวัน</div>
         <div>
-          <div class="row-val">${mlDaily.toFixed(1)} ml/day</div>
-          <div class="row-sub">${maxDailyMg.toFixed(0)} mg · max ${d.max_daily_kg} mg/kg/day</div>
+          ${d.mg_only
+            ? `<div class="row-val">${fm(maxDailyMg)} mg/day</div>
+               <div class="row-sub">max ${d.max_daily_kg} mg/kg/day</div>`
+            : `<div class="row-val">${mlDaily.toFixed(1)} ml/day</div>
+               <div class="row-sub">${fm(maxDailyMg)} mg · max ${d.max_daily_kg} mg/kg/day</div>`}
         </div>
       </div>
     </div>

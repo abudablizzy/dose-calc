@@ -75,6 +75,9 @@
   }
   input:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mode-tabs{display:flex;gap:6px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px}
+  .mode-tab{flex:1;padding:10px 8px;font-size:13px;font-weight:500;border:none;border-radius:var(--radius-sm);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+  .mode-tab.active{background:#1D4ED8;color:#fff}
   .search-wrap{position:relative}
   .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:var(--text3);color:var(--surface);border:none;font-size:14px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0}
   .clear-btn.show{display:flex}
@@ -130,6 +133,11 @@
     <p>คำนวณปริมาณยาน้ำตามน้ำหนักตัว</p>
   </header>
 
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-fwd" onclick="setMode('fwd')">คำนวณโดส</button>
+    <button class="mode-tab" id="tab-rev" onclick="setMode('rev')">ย้อนกลับ (ml → mg/kg)</button>
+  </div>
+
   <div class="card">
     <div class="card-title">ข้อมูลผู้ป่วย</div>
     <div class="grid2">
@@ -148,6 +156,16 @@
         <input type="text" id="drug-search" placeholder="พิมชื่อยา เช่น para, amox, ibu..." autocomplete="off" autocorrect="off" autocapitalize="off" oninput="onSearch()" onfocus="onSearchFocus()">
         <button class="clear-btn" id="clear-btn" onclick="clearSearch()" aria-label="ล้าง">✕</button>
         <div class="dropdown" id="dropdown"></div>
+      </div>
+    </div>
+    <div class="grid2" id="reverse-inputs" style="display:none">
+      <div class="field">
+        <label>ปริมาณต่อครั้ง (ml)</label>
+        <input type="number" id="rev-ml" inputmode="decimal" min="0" step="0.1" placeholder="เช่น 3" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>จำนวนครั้ง/วัน</label>
+        <input type="number" id="rev-freq" inputmode="numeric" min="1" max="6" step="1" placeholder="เช่น 3" oninput="calc()">
       </div>
     </div>
   </div>
@@ -169,17 +187,17 @@
 <script>
 const allDrugs = [
   {name:"Paracetamol (Acetaminophen)",alias:["para","paracetamol","acetaminophen","tylenol","panadol"],group:"ลดไข้ / ปวด",conc:24,conc_label:"120 mg/5ml",form:"น้ำเชื่อม",min_dose:10,max_dose:15,max_single:1000,max_daily_kg:60,freq:"ทุก 4–6 ชั่วโมง",note:"ปลอดภัยสำหรับเด็กทุกวัย",safe:true},
-  {name:"Ibuprofen",alias:["ibu","ibuprofen","brufen","advil"],group:"ลดไข้ / ปวด",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:5,max_dose:10,max_single:400,max_daily_kg:40,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 6 เดือน / ระวังในผู้มีปัญหากระเพาะ",safe:false,min_age:0.5},
+  {name:"Ibuprofen",alias:["ibu","ibuprofen","brufen","advil"],group:"ลดไข้ / ปวด",conc:20,conc_label:"20 mg/ml (100 mg/5ml)",form:"น้ำเชื่อม",min_dose:5,max_dose:10,max_single:400,max_daily_kg:40,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 6 เดือน / ระวังในผู้มีปัญหากระเพาะ",safe:false,min_age:0.5},
   {name:"Amoxicillin",alias:["amox","amoxicillin","amoxil"],group:"ยาปฏิชีวนะ",conc:50,conc_label:"250 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:8.33,max_dose:16.67,max_single:500,max_daily_kg:90,freq:"ทุก 8 ชั่วโมง",note:"กลุ่ม penicillin ระวังผู้แพ้",safe:true},
   {name:"Azithromycin",alias:["azithro","azithromycin","zithromax","azi"],group:"ยาปฏิชีวนะ",conc:40,conc_label:"200 mg/5ml",form:"น้ำแขวนตะกอน",freq:"วันละ 1 ครั้ง นาน 5 วัน",regimen:[{label:"วันแรก",dose:10,max:500},{label:"วันที่ 2–5",dose:5,max:250}],note:"Pneumonia (CAP / mycoplasma / chlamydia) วันละ 1 ครั้ง ก่อนหรือหลังอาหาร",safe:true},
-  {name:"Co-amoxiclav (Augmentin)",alias:["coamox","co-amox","augmentin","amoxiclav"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"156.25 mg/5ml (amoxicillin 125 mg/5ml)",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8–12 ชั่วโมง",note:"คิดจาก amoxicillin component",safe:true},
+  {name:"Co-amoxiclav (Augmentin)",alias:["coamox","co-amox","augmentin","amoxiclav"],group:"ยาปฏิชีวนะ",conc:80,conc_label:"457 mg/5ml (amoxicillin 400 mg/5ml)",form:"น้ำแขวนตะกอน",min_dose:20,max_dose:40,max_single:500,max_daily_kg:90,freq:"ทุก 8–12 ชั่วโมง",note:"คิดจาก amoxicillin component",safe:true},
   {name:"Cetirizine",alias:["cetiri","cetirizine","zyrtec"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"อายุ 1–2ปี: 2.5mg, 2–6ปี: 2.5–5mg, >6ปี: 5–10mg",safe:true},
   {name:"Chlorpheniramine (CPM)",alias:["chlor","cpm","chlorpheniramine","piriton"],group:"แก้แพ้",conc:0.4,conc_label:"2 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:1},{min_age:6,max_age:18,dose:2}],max_single:4,freq:"ทุก 4–6 ชั่วโมง",note:"ระวังง่วงซึม ไม่แนะนำในเด็กอายุ < 2 ปี",safe:false,min_age:2},
   {name:"Loratadine",alias:["lorat","loratadine","claritin"],group:"แก้แพ้",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.2,max_dose:0.2,max_single:10,max_daily_kg:10,freq:"วันละ 1 ครั้ง",note:"< 30 kg: 5 mg/day, ≥ 30 kg: 10 mg/day",safe:true,min_age:2},
   {name:"Dextromethorphan (DXM)",alias:["dextro","dxm","dextromethorphan"],group:"ไอ / น้ำมูก",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.5,max_single:30,max_daily_kg:2,freq:"ทุก 6–8 ชั่วโมง",note:"ห้ามใช้ในเด็กอายุ < 4 ปี",safe:false,min_age:4},
-  {name:"Bromhexine",alias:["bromhex","bromhexine","bisolvon"],group:"ไอ / น้ำมูก",conc:0.8,conc_label:"4 mg/5ml",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:2,label:"2 ถึง < 6 ปี",freq_override:"วันละ 3 ครั้ง (หรือ 4 mg วันละ 2 ครั้ง)",max_day:8},{min_age:6,max_age:12,dose:4,dose_max:8,label:"6 ถึง < 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:24},{min_age:12,max_age:19,dose:8,label:"≥ 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:48}],max_single:8,freq:"วันละ 3 ครั้ง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว ไม่แนะนำในเด็กอายุ < 2 ปี",safe:true,min_age:2},
+  {name:"Bromhexine",alias:["bromhex","bromhexine","bisolvon"],group:"ไอ / น้ำมูก",conc:8,conc_label:"เม็ด 8 mg",unit:"เม็ด",form:"น้ำเชื่อม",age_based:true,age_doses:[{min_age:2,max_age:6,dose:2,label:"2 ถึง < 6 ปี",freq_override:"วันละ 3 ครั้ง (หรือ 4 mg วันละ 2 ครั้ง)",max_day:8},{min_age:6,max_age:12,dose:4,dose_max:8,label:"6 ถึง < 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:24},{min_age:12,max_age:19,dose:8,label:"≥ 12 ปี",freq_override:"วันละ 3 ครั้ง",max_day:48}],max_single:8,freq:"วันละ 3 ครั้ง",note:"ละลายเสมหะ เหมาะกับเสมหะเหนียว ไม่แนะนำในเด็กอายุ < 2 ปี",safe:true,min_age:2},
   {name:"Glyceryl Guaiacolate (Guaifenesin)",alias:["glyceryl","guaifenesin","guai","gg","guaiacolate"],group:"ไอ / น้ำมูก",conc:20,conc_label:"100 mg/5ml",form:"น้ำเชื่อม",min_dose:6,max_dose:12,max_single:600,max_daily_kg:50,freq:"ทุก 4–6 ชั่วโมง",note:"ขับเสมหะ ควรดื่มน้ำมากๆ ห้ามใช้ในเด็กอายุ < 2 ปี",safe:false,min_age:2},
-  {name:"Ambroxol",alias:["ambroxol","ambroxal","ambro","mucosolvan","ambrox"],group:"ไอ / น้ำมูก",conc:3,conc_label:"15 mg/5ml",form:"น้ำเชื่อม",min_dose:1.2,max_dose:1.6,max_single:30,max_daily_kg:4.8,freq:"ทุก 8–12 ชั่วโมง (วันละ 2–3 ครั้ง)",note:"ละลายเสมหะ ห้ามใช้ในเด็กอายุ < 2 ปี โดยไม่มีคำแนะนำจากแพทย์",safe:true,min_age:2},
+  {name:"Ambroxol",alias:["ambroxol","ambroxal","ambro","mucosolvan","ambrox"],group:"ไอ / น้ำมูก",conc:6,conc_label:"30 mg/5ml",form:"น้ำเชื่อม",min_dose:1.2,max_dose:1.6,max_single:30,max_daily_kg:4.8,freq:"ทุก 8–12 ชั่วโมง (วันละ 2–3 ครั้ง)",note:"ละลายเสมหะ ห้ามใช้ในเด็กอายุ < 2 ปี โดยไม่มีคำแนะนำจากแพทย์",safe:true,min_age:2},
   {name:"Cefixime",alias:["cefixime","cefix","suprax","cef"],group:"ยาปฏิชีวนะ",conc:20,conc_label:"100 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:4,max_dose:8,max_single:400,max_daily_kg:8,freq:"ทุก 12–24 ชั่วโมง",note:"กลุ่ม cephalosporin ห้ามใช้ในเด็กอายุ < 6 เดือน ระวังในผู้แพ้ penicillin",safe:true,min_age:0.5},
   {name:"Cephalexin",alias:["cephalexin","cefalexin","keflex","ceph"],group:"ยาปฏิชีวนะ",conc:25,conc_label:"125 mg/5ml",form:"น้ำแขวนตะกอน",min_dose:6.25,max_dose:12.5,max_single:500,max_daily_kg:50,freq:"ทุก 6–12 ชั่วโมง",note:"25–50 mg/kg/day กลุ่ม cephalosporin ระวังในผู้แพ้ penicillin",safe:true},
   {name:"Domperidone",alias:["domperidone","motilium","dominox","dom"],group:"แก้คลื่นไส้ / อาเจียน",conc:1,conc_label:"5 mg/5ml",form:"น้ำเชื่อม",min_dose:0.25,max_dose:0.25,max_single:10,max_daily_kg:0.75,freq:"วันละ 3 ครั้ง ก่อนอาหาร 15 นาที",note:"อายุ >1 เดือน หรือ นน. ≤35 kg: 0.25 mg/kg วันละ 3 ครั้ง (Max 0.75 mg/kg/day) | อายุ 12–17 ปี หรือ นน. ≥35 kg: 10 mg วันละ 3 ครั้ง (Max 30 mg/day) ระวัง QT prolongation",safe:false},
@@ -189,12 +207,20 @@ const allDrugs = [
   {name:"Adrenaline / Epinephrine (Anaphylaxis)",alias:["adrenaline","epinephrine","adr","epi"],group:"ยาฉุกเฉิน (ฉีด)",conc:1,conc_label:"1:1000 (1 mg/ml) IM",form:"ยาฉีด IM",min_dose:0.01,max_dose:0.01,max_single:0.3,max_daily_kg:0.06,freq:"ซ้ำได้ทุก 5–15 นาที หากอาการไม่ดีขึ้น",note:"0.01 mg/kg (= 0.01 ml/kg ของ 1:1000) ฉีด IM กลางต้นขาด้านนอก Max เด็ก 0.3 mg, ผู้ใหญ่/วัยรุ่น 0.5 mg ตาม guideline anaphylaxis ไทย — ยา first-line ห้ามรอ",safe:false},
   {name:"Omeprazole",alias:["omeprazole","ome","losec","miracid"],group:"ยาลดกรด (GERD)",conc:2,conc_label:"2 mg/ml (susp ตำรับสถาบันสุขภาพเด็กฯ)",form:"น้ำแขวนตะกอน",min_dose:0.7,max_dose:4,max_single:40,max_daily_kg:4,freq:"วันละ 1 ครั้ง ก่อนอาหาร 30 นาที",note:"GERD: 0.7–4 mg/kg/day วันละ 1 ครั้ง (Max 40 mg/day) นาน 4–8 สัปดาห์ | Neonates: 0.5–1.5 mg/kg/dose วันละ 1 ครั้ง",safe:true},
   {name:"IV Maintenance Fluid (Holliday-Segar)",alias:["iv","fluid","maintenance","ivf","สารน้ำ","holliday","segar"],group:"สารน้ำ",conc_label:"Holliday-Segar method",form:"IV fluid",iv_fluid:true,freq:"ต่อเนื่อง 24 ชั่วโมง",note:"10 kg แรก: 100 ml/kg/day | 10 kg ถัดไป: 50 ml/kg/day | ส่วนที่เกิน 20 kg: 20 ml/kg/day (rate คิดตามกฎ 4-2-1)",safe:true},
-  {name:"Simethicone",alias:["simethicone","airx","air-x","simeticone"],group:"ขับลม / ท้องอืด",conc:66.67,conc_label:"40 mg/0.6ml (drops)",form:"ยาหยด",age_based:true,age_doses:[{min_age:0,max_age:2,dose:20,label:"< 2 ปี (< 10.9 kg)",max_day:240},{min_age:2,max_age:12,dose:40,label:"< 12 ปี (≥ 10.9 kg)",max_day:480},{min_age:12,max_age:19,dose:40,dose_max:125,label:"≥ 12 ปี",max_day:500}],max_single:125,freq:"วันละ 4 ครั้ง หลังอาหาร และก่อนนอน",note:"คำนวณจาก simethicone (Air-x drop 40 mg/0.6 ml) ยาปลอดภัย ไม่ดูดซึมเข้ากระแสเลือด",safe:true},
+  {name:"Simethicone",alias:["simethicone","airx","air-x","simeticone"],group:"ขับลม / ท้องอืด",conc:67,conc_label:"67 mg/ml (drops)",form:"ยาหยด",age_based:true,age_doses:[{min_age:0,max_age:2,dose:20,label:"< 2 ปี (< 10.9 kg)",max_day:240},{min_age:2,max_age:12,dose:40,label:"< 12 ปี (≥ 10.9 kg)",max_day:480},{min_age:12,max_age:19,dose:40,dose_max:125,label:"≥ 12 ปี",max_day:500}],max_single:125,freq:"วันละ 4 ครั้ง หลังอาหาร และก่อนนอน",note:"คำนวณจาก simethicone (Air-x drop 40 mg/0.6 ml) ยาปลอดภัย ไม่ดูดซึมเข้ากระแสเลือด",safe:true},
 ];
 
 let selected = null;
 let deficitPct = 0;
 function setDeficit(p){ deficitPct = p; calc(); }
+let mode = 'fwd';
+function setMode(m){
+  mode = m;
+  document.getElementById('tab-fwd').className = m==='fwd' ? 'mode-tab active' : 'mode-tab';
+  document.getElementById('tab-rev').className = m==='rev' ? 'mode-tab active' : 'mode-tab';
+  document.getElementById('reverse-inputs').style.display = m==='rev' ? 'grid' : 'none';
+  calc();
+}
 
 function onSearch(){
   const q = document.getElementById('drug-search').value.trim().toLowerCase();
@@ -232,7 +258,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.search-wrap')) document.getElementById('dropdown').className='dropdown';
 });
 function rh(n){if(n<1)return Math.round(n*100)/100;if(n<10)return Math.round(n*4)/4;return Math.round(n*2)/2;}
-function fm(n){if(n%1===0)return n.toFixed(0);const q=(n*4)%2;if(q!==0&&n<10)return n.toFixed(2).replace(/0$/,"");if(n<1)return n.toFixed(2);return n.toFixed(1);}
+function fm(n){if(n%1===0)return n.toFixed(0);let s=(n<1?n.toFixed(2):n.toFixed(2));return s.replace(/0+$/,"").replace(/\.$/,"");}
 function calc(){
   const wt = parseFloat(document.getElementById('weight').value);
   const age = parseFloat(document.getElementById('age').value);
@@ -249,6 +275,63 @@ function calc(){
   const ageWarn = d.min_age && !isNaN(age) && age < d.min_age;
   const badge = d.safe ? `<span class="tag badge-safe">ปลอดภัย</span>` : `<span class="tag badge-warn">ระวัง</span>`;
   const ageAlert = ageWarn ? `<div class="alert alert-danger">⚠️ ยานี้ไม่แนะนำในเด็กอายุน้อยกว่า ${d.min_age} ปี</div>` : '';
+
+  // ===== REVERSE MODE =====
+  if(mode === 'rev') {
+    if(d.iv_fluid || d.mg_only || !d.conc){
+      area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">↩️</div><div>โหมดย้อนกลับใช้ได้เฉพาะยาน้ำที่มีความเข้มข้น</div></div></div>';
+      return;
+    }
+    const ml = parseFloat(document.getElementById('rev-ml').value);
+    const freq = parseFloat(document.getElementById('rev-freq').value);
+    if(!ml||ml<=0||!freq||freq<=0){
+      area.innerHTML='<div class="card"><div class="empty-state"><div class="empty-icon">↩️</div><div>กรอกปริมาณ (ml) และจำนวนครั้ง/วัน</div></div></div>';
+      return;
+    }
+    const mgDose = ml * d.conc;
+    const mgPerKgDose = mgDose / wt;
+    const mgPerKgDay = mgPerKgDose * freq;
+    const mgDay = mgDose * freq;
+    // Reference range (per dose) if available
+    let rangeNote = '';
+    let status = null; // 'in' | 'low' | 'high'
+    if(d.min_dose && d.max_dose){
+      const lo = d.min_dose, hi = d.max_dose;
+      rangeNote = `ช่วงมาตรฐาน ${lo===hi?lo:lo+'–'+hi} mg/kg/dose`;
+      if(mgPerKgDose < lo*0.9) status = 'low';
+      else if(mgPerKgDose > hi*1.1) status = 'high';
+      else status = 'in';
+    }
+    let statusBox = '';
+    if(status === 'in'){
+      statusBox = `<div class="alert alert-warn" style="background:var(--green-bg);color:var(--green-text);border-color:var(--green-border)">✅ อยู่ในช่วงมาตรฐาน · ${rangeNote}</div>`;
+    } else if(status === 'low'){
+      statusBox = `<div class="alert alert-danger" style="background:var(--warn-bg);color:var(--warn-text);border-color:var(--warn-border)">🔻 ต่ำกว่าขนาดมาตรฐาน · ${rangeNote} (ได้รับ ${fm(mgPerKgDose)} mg/kg/dose) — อาจได้ผลไม่เต็มที่</div>`;
+    } else if(status === 'high'){
+      statusBox = `<div class="alert alert-danger">🔺 สูงกว่าขนาดมาตรฐาน · ${rangeNote} (ได้รับ ${fm(mgPerKgDose)} mg/kg/dose) — เสี่ยงเกินขนาด โปรดตรวจสอบ</div>`;
+    }
+
+    area.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-drug">${d.name}</div>
+        <div class="result-meta"><span class="tag">${d.group}</span>${badge}<span class="tag">${d.conc_label}</span></div>
+      </div>
+      <div class="ml-box">
+        <div class="ml-label">ขนาดยาที่ได้รับ</div>
+        <div><span class="ml-value">${fm(mgPerKgDay)}</span><span class="ml-unit">mg/kg/day</span></div>
+        <div class="ml-sub">${fm(ml)} ml × ${freq} ครั้ง · ${d.conc} mg/ml ÷ ${wt} kg</div>
+      </div>
+      ${statusBox}
+      <div class="rows">
+        <div class="row"><div class="row-label">ต่อครั้ง</div><div class="row-val">${fm(mgDose)} mg <span style="color:var(--text3)">(${fm(mgPerKgDose)} mg/kg/dose)</span></div></div>
+        <div class="row"><div class="row-label">รวมต่อวัน</div><div class="row-val">${fm(mgDay)} mg/day</div></div>
+      </div>
+      <div class="note-box">ℹ️ ${d.note}</div>
+    </div>`;
+    return;
+  }
+  // ===== FORWARD MODE (below) =====
 
   if(d.iv_fluid) {
     let mlDay = 0, rate = 0;
@@ -346,9 +429,10 @@ function calc(){
     }
     const mgDose = ageGroup.dose;
     const mgDoseMax = ageGroup.dose_max || ageGroup.dose;
-    const mlDose = rh(mgDose/d.conc);
-    const mlDoseMax = rh(mgDoseMax/d.conc);
-    const mlDisp = mlDose===mlDoseMax ? mlDose.toFixed(1) : mlDose.toFixed(1)+'–'+mlDoseMax.toFixed(1);
+    const unit = d.unit || 'ml';
+    const amtDose = rh(mgDose/d.conc);
+    const amtDoseMax = rh(mgDoseMax/d.conc);
+    const mlDisp = amtDose===amtDoseMax ? fm(amtDose) : fm(amtDose)+'–'+fm(amtDoseMax);
     const mgDisp = mgDose===mgDoseMax ? mgDose : mgDose+'–'+mgDoseMax;
     const grpLabel = ageGroup.label || ('อายุ '+ageGroup.min_age+'–'+ageGroup.max_age+' ปี');
     const maxDayRow = ageGroup.max_day ? '<div class="row"><div class="row-label">สูงสุดต่อวัน</div><div class="row-val">'+ageGroup.max_day+' mg/day</div></div>' : '';
@@ -361,7 +445,7 @@ function calc(){
       </div>
       <div class="ml-box">
         <div class="ml-label">ปริมาณต่อครั้ง</div>
-        <div><span class="ml-value">${mlDisp}</span><span class="ml-unit">ml</span></div>
+        <div><span class="ml-value">${mlDisp}</span><span class="ml-unit">${unit}</span></div>
         <div class="ml-sub">${mgDisp} mg · ${grpLabel}</div>
       </div>
       ${ageAlert}
